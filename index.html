@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NPP Constituency Register</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#14203a;--mu:#5b6783;--bd:#d9e0ee;--ac:#0a3d91;--ac2:#e8eefb;--dn:#d62027;--rd:#d62027;--lk:#0a3d91;--hd:#0a3d91}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1424;--card:#16203a;--tx:#eaf0ff;--mu:#9fb0d4;--bd:#27345a;--ac:#2f62c9;--ac2:#1b2a52;--dn:#ff6b72;--rd:#e5333b;--lk:#8db3ff;--hd:#0a2a66}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--hd);color:#fff;padding:16px 20px;border-bottom:5px solid var(--rd)}
+header h1{margin:0;font-size:20px}header p{margin:2px 0 0;opacity:.85;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:120px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 14px}
+.stat b{display:block;font-size:22px;color:var(--lk)}.stat span{color:var(--mu);font-size:12px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end}
+form h3{grid-column:1/-1;margin:6px 0 0;font-size:13px;color:var(--lk);text-transform:uppercase;letter-spacing:.05em}
+.wide{grid-column:1/-1}
+label{font-size:12px;color:var(--mu);display:block;margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:var(--tx);font:inherit}
+button{padding:9px 14px;border:0;border-radius:7px;background:var(--ac);color:#fff;font:inherit;cursor:pointer}
+button.s{background:var(--ac2);color:var(--lk);border:1px solid var(--bd)}
+button.d{background:transparent;color:var(--dn);padding:4px 8px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}.bar>*{flex:1;min-width:140px}.bar button{flex:0 0 auto}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+td small{display:block;color:var(--mu)}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:var(--ac2);color:var(--lk)}
+.tag.x{background:#fdeceb;color:var(--dn)}
+.empty{padding:24px;text-align:center;color:var(--mu)}
+.note{font-size:12px;color:var(--mu)}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hd .me{font-size:13px;display:flex;align-items:center;gap:10px}
+#login{max-width:380px;margin:10vh auto;padding:0 16px}
+#login h1{text-align:center;font-size:20px;color:var(--lk);margin:0 0 4px}
+#login p.sub{text-align:center;color:var(--mu);margin:0 0 16px;font-size:13px}
+#login .f>div{margin-bottom:10px}
+.err{color:var(--dn);font-size:13px;min-height:18px;margin:0 0 8px}
+body[data-role="staff"] button.d,body[data-role="staff"] #im,body[data-role="staff"] .byc{display:none}
+a{color:var(--lk)}
+.tri{height:6px;border-radius:3px;margin-bottom:18px;background:linear-gradient(90deg,#0a3d91 0 33.3%,#fff 33.3% 66.6%,#d62027 66.6%);border:1px solid var(--bd)}
+#pendBanner{border-color:var(--rd);border-left:5px solid var(--rd)}
+</style>
+</head>
+<body>
+<div id="login" hidden>
+<div class="tri"></div><h1>NPP Constituency Register</h1><p class="sub">Authorised users only</p>
+<div class="card"><form id="lf" class="f" style="display:block" autocomplete="off">
+<h3 id="lt" style="margin:0 0 12px;font-size:16px;text-transform:none;letter-spacing:0;color:var(--tx)">Sign in</h3>
+<div><label>Username</label><input id="lu" required autocomplete="username"></div>
+<div><label>Password</label><input id="lp" type="password" required autocomplete="current-password"></div>
+<div id="lc" hidden><label>Confirm password</label><input id="lc2" type="password"></div>
+<p class="err" id="lerr"></p>
+<button type="submit" id="lb" style="width:100%">Sign in</button>
+<p class="note" style="text-align:center;margin:12px 0 0"><a href="#" id="toReg">New staff? Request access</a></p>
+</form>
+<form id="rf" class="f" style="display:none" autocomplete="off">
+<h3 style="margin:0 0 12px;font-size:16px;text-transform:none;letter-spacing:0;color:var(--tx)">Request staff access</h3>
+<div><label>Full name</label><input id="rn" required></div>
+<div><label>Username</label><input id="ru" required></div>
+<div><label>Password (minimum 8 characters)</label><input id="rp" type="password" required></div>
+<div><label>Confirm password</label><input id="rc" type="password" required></div>
+<p class="err" id="rerr"></p>
+<button type="submit" style="width:100%">Submit request</button>
+<p class="note" style="text-align:center;margin:12px 0 0">An administrator must approve your request before you can sign in.</p>
+<p class="note" style="text-align:center;margin:6px 0 0"><a href="#" id="toLog">Back to sign in</a></p>
+</form></div></div>
+
+<div id="shell" hidden>
+<header class="hd"><div><h1>NPP Constituency Comprehensive Register</h1><p>Voter records · Electoral areas · Polling stations · Contacts</p></div>
+<div class="me"><span id="who"></span><button class="s" id="cp">Change password</button><button class="s" id="lo">Sign out</button></div></header>
+<main>
+<div class="card" id="pendBanner" hidden><b id="pendMsg"></b> <a href="#usersCard">Review requests</a></div>
+<div class="stats">
+<div class="stat"><b id="sT">0</b><span>Registered</span></div>
+<div class="stat"><b id="sAc">0</b><span>Active</span></div>
+<div class="stat"><b id="sA">0</b><span>Electoral areas</span></div>
+<div class="stat"><b id="sP">0</b><span>Polling stations</span></div>
+<div class="stat"><b id="sM">0</b><span>Male / <span id="sF">0</span> Female</span></div>
+</div>
+
+<div class="card" style="margin-top:14px">
+<form id="f">
+<input type="hidden" id="id">
+<h3>Personal details</h3>
+<div><label>Full name *</label><input id="name" required></div>
+<div><label>Voter ID number</label><input id="vid"></div>
+<div><label>Gender</label><select id="gender"><option value="">—</option><option>Male</option><option>Female</option></select></div>
+<div><label>Date of birth</label><input id="dob" type="date"></div>
+<div><label>Occupation</label><input id="occ"></div>
+<h3>Electoral details</h3>
+<div><label>Electoral area *</label><input id="area" list="areas" required></div>
+<div><label>Polling station name *</label><input id="ps" list="pss" required></div>
+<div><label>Polling station code</label><input id="psc"></div>
+<div><label>Registration date</label><input id="reg" type="date"></div>
+<div><label>Status</label><select id="status"><option>Active</option><option>Relocated</option><option>Deceased</option><option>Inactive</option></select></div>
+<h3>Contact</h3>
+<div><label>Phone *</label><input id="ph" type="tel" required></div>
+<div><label>Alternative phone</label><input id="ph2" type="tel"></div>
+<div><label>Email</label><input id="em" type="email"></div>
+<div class="wide"><label>Residential address / landmark</label><input id="addr"></div>
+<div class="wide"><label>Notes</label><textarea id="notes" rows="2"></textarea></div>
+<div style="display:flex;gap:8px"><button type="submit" id="sv">Add record</button><button type="button" class="s" id="cl">Clear</button></div>
+</form>
+<datalist id="areas"></datalist><datalist id="pss"></datalist>
+</div>
+
+<div class="card">
+<div class="bar">
+<input id="q" placeholder="Search name, voter ID, phone, address…">
+<select id="fa"><option value="">All electoral areas</option></select>
+<select id="fp"><option value="">All polling stations</option></select>
+<select id="fs"><option value="">All statuses</option><option>Active</option><option>Relocated</option><option>Deceased</option><option>Inactive</option></select>
+<select id="fg"><option value="">All genders</option><option>Male</option><option>Female</option></select>
+<button class="s" id="ex">Export CSV</button>
+<button class="s" id="im">Import CSV</button>
+<input type="file" id="file" accept=".csv" hidden>
+</div>
+<div class="tw"><table><thead><tr><th>#</th><th>Full name</th><th>Voter ID</th><th>Electoral area</th><th>Polling station</th><th>Contact</th><th>Status</th><th class="byc">Added by</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+<div id="empty" class="empty" hidden>No records found.</div>
+<p class="note"><span id="cnt"></span> Records are saved only in this browser on this device. Export a CSV regularly to back up. Handle personal data in line with Ghana's Data Protection Act, 2012 (Act 843).</p>
+</div>
+<div class="card" id="usersCard" hidden>
+<div id="pendBox" hidden style="margin-bottom:16px"><h3 style="margin:0 0 10px">Pending staff approvals</h3>
+<div class="tw"><table style="min-width:420px"><thead><tr><th>Full name</th><th>Username</th><th></th></tr></thead><tbody id="pb"></tbody></table></div></div>
+<h3 style="margin:0 0 10px">User accounts (administrators only)</h3>
+<form id="uf" style="margin-bottom:10px">
+<div><label>Username</label><input id="nu" required></div>
+<div><label>Temporary password (min 8)</label><input id="np" type="password" required></div>
+<div><label>Role</label><select id="nr"><option value="staff">Staff (add / edit)</option><option value="admin">Admin (full access)</option></select></div>
+<div><button type="submit">Add user</button></div>
+</form>
+<div class="tw"><table style="min-width:420px"><thead><tr><th>Username</th><th>Role</th><th></th></tr></thead><tbody id="ub"></tbody></table></div>
+<p class="note">Staff cannot delete records or import CSV files.</p>
+</div>
+</main></div>
+
+<script>
+const KEY="constituency-register-v2";
+const F=[["name","Full name"],["vid","Voter ID"],["gender","Gender"],["dob","Date of birth"],["occ","Occupation"],["area","Electoral area"],["ps","Polling station"],["psc","Polling station code"],["reg","Registration date"],["status","Status"],["ph","Phone"],["ph2","Alt phone"],["em","Email"],["addr","Address"],["notes","Notes"]];
+let rows=[];
+try{rows=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){rows=[]}
+const $=i=>document.getElementById(i);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(rows))}catch(e){}};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const vis=()=>me&&me.role==="admin"?rows:rows.filter(r=>me&&r.by===me.u);
+const uniq=k=>[...new Set(vis().map(r=>r[k]))].filter(Boolean).sort();
+const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+function fill(sel,vals,first){const cur=sel.value;sel.innerHTML=`<option value="">${first}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join("");sel.value=vals.includes(cur)?cur:""}
+
+function render(){
+ const V=vis();
+ const q=$("q").value.toLowerCase();
+ fill($("fa"),uniq("area"),"All electoral areas");
+ fill($("fp"),uniq("ps"),"All polling stations");
+ $("areas").innerHTML=uniq("area").map(v=>`<option value="${esc(v)}">`).join("");
+ $("pss").innerHTML=uniq("ps").map(v=>`<option value="${esc(v)}">`).join("");
+ const list=V.filter(r=>
+  (!q||[r.name,r.vid,r.ph,r.ph2,r.addr,r.em,me.role==="admin"?r.by:""].some(v=>(v||"").toLowerCase().includes(q)))&&
+  (!$("fa").value||r.area===$("fa").value)&&(!$("fp").value||r.ps===$("fp").value)&&
+  (!$("fs").value||r.status===$("fs").value)&&(!$("fg").value||r.gender===$("fg").value));
+ $("tb").innerHTML=list.map((r,i)=>`<tr>
+  <td>${i+1}</td>
+  <td>${esc(r.name)}<small>${esc([r.gender,r.dob].filter(Boolean).join(" · "))}</small></td>
+  <td>${esc(r.vid)}</td>
+  <td>${esc(r.area)}</td>
+  <td>${esc(r.ps)}<small>${esc(r.psc)}</small></td>
+  <td>${esc(r.ph)}<small>${esc(r.em)}</small></td>
+  <td><span class="tag ${r.status==="Deceased"||r.status==="Inactive"?"x":""}">${esc(r.status||"Active")}</span></td>
+  <td class="byc">${esc(r.by||"—")}</td><td style="white-space:nowrap"><button class="s" onclick="edit('${r.id}')">Edit</button><button class="d" onclick="del('${r.id}')">Delete</button></td></tr>`).join("");
+ $("empty").hidden=list.length>0;
+ $("cnt").textContent=`Showing ${list.length} of ${V.length}.`;
+ $("sT").textContent=V.length;
+ $("sAc").textContent=V.filter(r=>(r.status||"Active")==="Active").length;
+ $("sA").textContent=uniq("area").length;
+ $("sP").textContent=uniq("ps").length;
+ $("sM").textContent=V.filter(r=>r.gender==="Male").length;
+ $("sF").textContent=V.filter(r=>r.gender==="Female").length;
+}
+
+function reset(){$("f").reset();$("id").value="";$("sv").textContent="Add record"}
+
+$("f").onsubmit=e=>{
+ e.preventDefault();
+ const old=rows.find(x=>x.id===$("id").value);
+ const r={id:$("id").value||newId(),by:old?old.by:me.u,at:old?old.at:Date.now()};
+ F.forEach(([k])=>r[k]=$(k).value.trim());
+ const i=rows.findIndex(x=>x.id===r.id);
+ if(i<0&&r.vid&&rows.some(x=>x.vid&&x.vid.toLowerCase()===r.vid.toLowerCase())&&!confirm("A record with this Voter ID already exists. Add anyway?"))return;
+ i>=0?rows[i]=r:rows.push(r);
+ save();reset();render();
+};
+$("cl").onclick=reset;
+
+window.edit=id=>{
+ const r=vis().find(x=>x.id===id);if(!r)return;
+ $("id").value=r.id;F.forEach(([k])=>$(k).value=r[k]||"");
+ $("sv").textContent="Update record";scrollTo(0,0);
+};
+window.del=id=>{if(confirm("Delete this record?")){rows=rows.filter(x=>x.id!==id);save();render()}};
+
+["q","fa","fp","fs","fg"].forEach(i=>$(i).oninput=render);
+
+const cell=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+$("ex").onclick=()=>{
+ const t=F.map(f=>f[1]).concat("Added by").join(",")+"\n"+vis().map(r=>F.map(([k])=>cell(r[k])).concat(cell(r.by)).join(",")).join("\n");
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([t],{type:"text/csv"}));
+ a.download="constituency-register.csv";a.click();
+};
+
+function parseCSV(t){
+ const out=[];let row=[],c="",q=false;
+ for(let i=0;i<t.length;i++){const ch=t[i];
+  if(q){if(ch=='"'&&t[i+1]=='"'){c+='"';i++}else if(ch=='"')q=false;else c+=ch}
+  else if(ch=='"')q=true;
+  else if(ch==","){row.push(c);c=""}
+  else if(ch=="\n"||ch=="\r"){if(ch=="\r"&&t[i+1]=="\n")i++;row.push(c);c="";if(row.some(x=>x.trim()))out.push(row);row=[]}
+  else c+=ch}
+ row.push(c);if(row.some(x=>x.trim()))out.push(row);return out;
+}
+$("im").onclick=()=>$("file").click();
+$("file").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  const data=parseCSV(rd.result.replace(/^\uFEFF/,""));
+  if(!data.length)return;
+  // map columns by header label if present, otherwise use default order
+  let map=F.map((_,i)=>i);
+  const head=data[0].map(h=>h.trim().toLowerCase());
+  if(head.some(h=>h.includes("name"))){
+   map=F.map(([k,l],i)=>{const j=head.indexOf(l.toLowerCase());return j>=0?j:-1});
+   data.shift();
+  }
+  let n=0;
+  data.forEach(d=>{
+   const r={id:newId(),by:me.u,at:Date.now()};
+   F.forEach(([k],i)=>r[k]=map[i]>=0?(d[map[i]]||"").trim():"");
+   if(!r.status)r.status="Active";
+   if(r.name){rows.push(r);n++}
+  });
+  save();render();alert(n+" records imported.");
+ };
+ rd.readAsText(f);e.target.value="";
+};
+
+/* ---------- Authentication ---------- */
+const UK="constituency-users-v1",SK="constituency-session";
+let users=[],me=null,fails=0,lockUntil=0,idle;
+try{users=JSON.parse(localStorage.getItem(UK)||"[]")}catch(e){users=[]}
+const saveU=()=>{try{localStorage.setItem(UK,JSON.stringify(users))}catch(e){}};
+/* Default accounts (passwords are stored only as hashes). Change them after first sign-in. */
+const SEED=[{"u":"admin","salt":"nEkS6vqH254AmzHx47ulXg==","h":"C5gFve6giGKIzKnfEG4Up4k5+hT4Pup611p0u9mrOBk=","role":"admin"},{"u":"staff","salt":"1t9y0f7tCoJJLYBIXSalBA==","h":"uxGBeVHKVAzGI90ZIoiTi1VGccTRLVg3nlJY5S8OQlc=","role":"staff"}];
+if(!users.length){users=SEED.map(x=>({...x}));saveU()}
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const newSalt=()=>b64(crypto.getRandomValues(new Uint8Array(16)));
+async function hash(pw,salt){
+ const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]);
+ return b64(await crypto.subtle.deriveBits({name:"PBKDF2",salt:new TextEncoder().encode(salt),iterations:150000,hash:"SHA-256"},k,256));
+}
+const validUser=u=>/^[a-z0-9._-]{3,30}$/.test(u);
+const lerr=m=>$("lerr").textContent=m;
+
+function showLogin(){
+ $("shell").hidden=true;$("login").hidden=false;
+ const setup=!users.length;
+ $("lt").textContent=setup?"First-time setup: create the administrator account":"Sign in";
+ $("lb").textContent=setup?"Create account":"Sign in";
+ $("lc").hidden=!setup;$("lc2").required=setup;
+ $("lf").reset();lerr("");$("rf").style.display="none";$("lf").style.display="block";$("toReg").hidden=setup;
+}
+function enter(u){
+ me=u;try{sessionStorage.setItem(SK,u.u)}catch(e){}
+ document.body.dataset.role=u.role;
+ $("login").hidden=true;$("shell").hidden=false;
+ $("who").textContent=u.u+" ("+u.role+")";
+ $("usersCard").hidden=u.role!=="admin";
+ renderUsers();render();bump();
+}
+function logout(){
+ me=null;try{sessionStorage.removeItem(SK)}catch(e){}
+ clearTimeout(idle);delete document.body.dataset.role;reset();showLogin();
+}
+$("lo").onclick=logout;
+$("cp").onclick=async()=>{
+ if(!me)return;
+ const o=prompt("Current password:");if(o===null)return;
+ const x=users.find(y=>y.u===me.u);
+ if(await hash(o,x.salt)!==x.h)return alert("Current password is incorrect.");
+ const n=prompt("New password (minimum 8 characters):");if(!n)return;
+ if(n.length<8)return alert("Password must be at least 8 characters.");
+ x.salt=newSalt();x.h=await hash(n,x.salt);saveU();alert("Password changed.");
+};
+
+$("lf").onsubmit=async e=>{
+ e.preventDefault();
+ const u=$("lu").value.trim().toLowerCase(),p=$("lp").value;
+ if(Date.now()<lockUntil){lerr("Too many attempts. Wait 30 seconds.");return}
+ try{
+  if(!users.length){
+   if(!validUser(u)){lerr("Username: 3+ characters, letters, numbers, . _ - only.");return}
+   if(p.length<8){lerr("Password must be at least 8 characters.");return}
+   if(p!==$("lc2").value){lerr("Passwords do not match.");return}
+   const salt=newSalt();users.push({u,salt,h:await hash(p,salt),role:"admin"});saveU();enter(users[0]);return;
+  }
+  const x=users.find(y=>y.u===u);
+  if(!x||await hash(p,x.salt)!==x.h){
+   if(++fails>=5){lockUntil=Date.now()+30000;fails=0}
+   lerr("Incorrect username or password.");return;
+  }
+  fails=0;
+  if(x.status==="pending"){lerr("Your registration is still awaiting administrator approval.");return}
+  enter(x);
+ }catch(ex){lerr("Sign-in needs a secure browser context (https or a local file).")}
+};
+
+/* ---------- Role guards ---------- */
+const _del=window.del;
+window.del=id=>{if(me&&me.role==="admin")_del(id)};
+$("im").onclick=()=>{if(me&&me.role==="admin")$("file").click()};
+
+/* ---------- User management ---------- */
+function renderUsers(){
+ renderPending();
+ $("ub").innerHTML=users.filter(x=>x.status!=="pending").map(x=>`<tr><td>${esc(x.u)}</td><td>${esc(x.role)}</td><td>${me&&x.u===me.u?"<small>(you)</small>":`<button class="s" onclick="resetPw('${esc(x.u)}')">Reset password</button><button class="d" onclick="rmUser('${esc(x.u)}')">Remove</button>`}</td></tr>`).join("");
+}
+$("uf").onsubmit=async e=>{
+ e.preventDefault();if(!me||me.role!=="admin")return;
+ const u=$("nu").value.trim().toLowerCase(),p=$("np").value;
+ if(!validUser(u))return alert("Username: 3+ characters, letters, numbers, . _ - only.");
+ if(users.some(x=>x.u===u))return alert("That username already exists.");
+ if(p.length<8)return alert("Password must be at least 8 characters.");
+ const salt=newSalt();users.push({u,salt,h:await hash(p,salt),role:$("nr").value});
+ saveU();$("uf").reset();renderUsers();
+};
+window.resetPw=async u=>{
+ if(!me||me.role!=="admin")return;
+ const p=prompt("New password for "+u+" (min 8 characters):");if(!p)return;
+ if(p.length<8)return alert("Password must be at least 8 characters.");
+ const x=users.find(y=>y.u===u);x.salt=newSalt();x.h=await hash(p,x.salt);saveU();alert("Password updated.");
+};
+window.rmUser=u=>{
+ if(!me||me.role!=="admin"||u===me.u)return;
+ if(confirm("Remove user "+u+"?")){users=users.filter(x=>x.u!==u);saveU();renderUsers()}
+};
+
+/* ---------- Auto sign-out after 15 minutes idle ---------- */
+function bump(){clearTimeout(idle);if(me)idle=setTimeout(logout,15*60*1000)}
+["click","keydown","touchstart"].forEach(ev=>addEventListener(ev,bump));
+
+/* ---------- Staff registration & approval ---------- */
+$("toReg").onclick=e=>{e.preventDefault();$("lf").style.display="none";$("rf").style.display="block";$("rerr").textContent=""};
+$("toLog").onclick=e=>{e.preventDefault();$("rf").style.display="none";$("lf").style.display="block"};
+$("rf").onsubmit=async e=>{
+ e.preventDefault();
+ const er=m=>$("rerr").textContent=m;
+ const n=$("rn").value.trim(),u=$("ru").value.trim().toLowerCase(),p=$("rp").value;
+ if(!validUser(u))return er("Username: 3+ characters, letters, numbers, . _ - only.");
+ if(p.length<8)return er("Password must be at least 8 characters.");
+ if(p!==$("rc").value)return er("Passwords do not match.");
+ if(users.some(x=>x.u===u))return er("That username is already taken.");
+ try{
+  const salt=newSalt();
+  users.push({u,name:n,salt,h:await hash(p,salt),role:"staff",status:"pending"});
+  saveU();$("rf").reset();$("rf").style.display="none";$("lf").style.display="block";lerr("");
+  alert("Request submitted. An administrator must approve your account before you can sign in.");
+ }catch(x){er("Registration needs a secure browser context (https or a local file).")}
+};
+function renderPending(){
+ const P=users.filter(x=>x.status==="pending");
+ $("pendBox").hidden=!P.length;
+ $("pb").innerHTML=P.map(x=>`<tr><td>${esc(x.name||"")}</td><td>${esc(x.u)}</td><td style="white-space:nowrap"><button onclick="approve('${esc(x.u)}')">Approve</button><button class="d" onclick="rejectU('${esc(x.u)}')">Reject</button></td></tr>`).join("");
+ $("pendBanner").hidden=!(me&&me.role==="admin"&&P.length);
+ $("pendMsg").textContent=P.length+" staff registration"+(P.length>1?"s":"")+" awaiting your approval.";
+}
+window.approve=u=>{
+ if(!me||me.role!=="admin")return;
+ const x=users.find(y=>y.u===u&&y.status==="pending");
+ if(x){delete x.status;x.approvedBy=me.u;saveU();renderUsers()}
+};
+window.rejectU=u=>{
+ if(!me||me.role!=="admin")return;
+ if(confirm("Reject and delete the request from "+u+"?")){users=users.filter(x=>!(x.u===u&&x.status==="pending"));saveU();renderUsers()}
+};
+
+/* ---------- Start ---------- */
+let saved=null;try{saved=sessionStorage.getItem(SK)}catch(e){}
+const su=saved&&users.find(x=>x.u===saved&&x.status!=="pending");
+su?enter(su):showLogin();
+</script>
+</body>
+</html>
